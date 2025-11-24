@@ -1,0 +1,178 @@
+# Test configuration for Education ERP System
+spring:
+  application:
+    name: education-erp-test
+  
+  # Database configuration for tests
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+  
+  # JPA configuration for tests
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+    open-in-view: false
+  
+  # H2 Console configuration for tests
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Flyway configuration for tests
+  flyway:
+    enabled: false  # Disable Flyway for tests to use H2 in-memory database
+  
+  # Jackson configuration for tests
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+  
+  # Security configuration for tests
+  security:
+    jwt:
+      secret: test-secret-key-for-jwt-token-generation-and-validation
+      expiration: 86400000  # 24 hours
+      refresh-expiration: 604800000  # 7 days
+  
+  # Cache configuration for tests
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=600s
+  
+  # Mail configuration for tests
+  mail:
+    host: localhost
+    port: 587
+    username: test@example.com
+    password: testpassword
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  
+  # Logging configuration for tests
+  logging:
+    level:
+      com.educationerp: DEBUG
+      org.springframework.security: DEBUG
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    pattern:
+      console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+      file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Test-specific configuration
+test:
+  # Test data configuration
+  data:
+    institution:
+      name: "Test Institution"
+      code: "TEST001"
+      email: "test@institution.com"
+    student:
+      count: 100
+      grade-levels: ["Grade 9", "Grade 10", "Grade 11", "Grade 12"]
+      programs: ["High School", "Middle School", "Elementary"]
+  
+  # Performance test configuration
+  performance:
+    max-response-time: 1000  # milliseconds
+    max-memory-usage: 512    # MB
+  
+  # Integration test configuration
+  integration:
+    test-containers:
+      enabled: true
+      postgres:
+        image: postgres:15
+        database: testdb
+        username: testuser
+        password: testpass
+        port: 5432
+
+# Management endpoints configuration for tests
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+
+# Test profiles
+---
+spring:
+  config:
+    activate:
+      on-profile: test-unit
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test-integration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/testdb
+    driver-class-name: org.postgresql.Driver
+    username: testuser
+    password: testpass
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test-performance
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
