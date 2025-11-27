@@ -18,6 +18,10 @@ author = "agent"
 task = "workflow.run"
 args = "Spring Boot Application"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Flutter Web App"
+
 [[workflows.workflow]]
 name = "Spring Boot Application"
 author = "agent"
@@ -30,13 +34,29 @@ task = "shell.exec"
 args = "mvn spring-boot:run"
 waitForPort = 8080
 
+[[workflows.workflow]]
+name = "Flutter Web App"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && dart run server.dart"
+waitForPort = 5000
+
 [[ports]]
-localPort = 8080
-externalPort = 8080
+localPort = 5000
+externalPort = 80
 
 [[ports]]
 localPort = 40195
 externalPort = 80
+
+[[ports]]
+localPort = 41061
+externalPort = 3001
 
 [deployment]
 deploymentTarget = "vm"
