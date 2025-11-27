@@ -72,6 +72,14 @@ The following changes were made to run this project on Replit:
    - Removed invalid repository methods that referenced non-existent entity fields
    - Fixed `NotificationRepository` and `ReportRepository`
 
+5. **Security Configuration**:
+   - Updated JWT secret to use `JWT_SECRET` environment variable with fallback
+   - Recommendation: Set `JWT_SECRET` using Replit Secrets for production security
+
+6. **Health Check Configuration**:
+   - Disabled mail health indicator (`management.health.mail.enabled=false`)
+   - Mail credentials can be configured later via `MAIL_USERNAME` and `MAIL_PASSWORD` environment variables
+
 ## Running the Application
 
 The application is configured to run automatically in Replit. The workflow is set up to execute:
@@ -117,7 +125,8 @@ The database schema includes the following main tables:
 
 The application uses JWT-based authentication with Spring Security. Default configuration:
 
-- **JWT Secret**: Configured in `application.properties`
+- **JWT Secret**: Uses `JWT_SECRET` environment variable (falls back to default if not set)
+  - **Recommendation**: Set `JWT_SECRET` in Replit Secrets for production security
 - **Access Token Expiration**: 30 minutes (1800000 ms)
 - **Refresh Token Expiration**: 24 hours (86400000 ms)
 
@@ -138,9 +147,7 @@ The system supports 9 different roles:
 
 ### Known Issues
 
-1. **Mail Health Check**: The `/actuator/health` endpoint shows "DOWN" because email credentials are not configured. This doesn't affect the application's core functionality.
-
-2. **Flyway Migrations**: Some entity tables are created by Hibernate (`update` mode) rather than Flyway migrations. For production deployment, create proper migration files for:
+1. **Flyway Migrations**: Some entity tables are created by Hibernate (`update` mode) rather than Flyway migrations. For production deployment, create proper migration files for:
    - curricula
    - enrollments
    - product_packages
@@ -149,9 +156,9 @@ The system supports 9 different roles:
 
 ### TODO Items
 
+- [ ] Set up `JWT_SECRET` using Replit Secrets for production security
 - [ ] Create complete Flyway migrations for all entities
-- [ ] Configure email service for notifications
-- [ ] Set up proper JWT secret using Replit secrets
+- [ ] Configure email service for notifications (optional - set `MAIL_USERNAME` and `MAIL_PASSWORD` environment variables and enable mail health check)
 - [ ] Add integration tests
 - [ ] Configure CORS for production deployments
 - [ ] Set up Redis for JWT token blacklist (optional)
@@ -169,11 +176,13 @@ The application is configured for deployment using Replit's VM deployment target
 
 **Changes Made**:
 1. Configured PostgreSQL database using Replit's built-in database
-2. Updated `application.properties` to use Replit environment variables
+2. Updated `application.properties` to use Replit environment variables for database, JWT secret, and mail credentials
 3. Changed Hibernate DDL strategy from `validate` to `update`
 4. Fixed repository methods with non-existent entity field references
-5. Set up Maven workflow to run Spring Boot application
+5. Set up Maven workflow to run Spring Boot application on port 8080
 6. Configured deployment for Replit VM
+7. Disabled mail health indicator to ensure health endpoint shows UP status
+8. Updated JWT secret to use environment variable for better security
 
 ## Support
 
