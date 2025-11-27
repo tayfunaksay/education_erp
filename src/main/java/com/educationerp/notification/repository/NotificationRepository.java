@@ -59,11 +59,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     long countByRecipientIdAndIsReadFalse(Long recipientId);
 
     /**
-     * Find notification by identifier
-     */
-    Optional<Notification> findByNotificationIdentifier(String notificationIdentifier);
-
-    /**
      * Find active notifications by recipient ID ordered by created date descending
      */
     List<Notification> findByRecipientIdAndIsActiveTrueOrderByCreatedDateDesc(Long recipientId);

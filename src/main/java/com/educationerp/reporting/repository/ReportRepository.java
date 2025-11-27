@@ -59,16 +59,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByCreatedBy(String username);
 
     /**
-     * Check if report exists with given identifier
-     */
-    boolean existsByReportIdentifier(String reportIdentifier);
-
-    /**
-     * Find report by identifier
-     */
-    Optional<Report> findByReportIdentifier(String reportIdentifier);
-
-    /**
      * Find active reports by institution ID ordered by created date descending
      */
     List<Report> findByInstitutionIdAndIsActiveTrueOrderByCreatedDateDesc(Long institutionId);
