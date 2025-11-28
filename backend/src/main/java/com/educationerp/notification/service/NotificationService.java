@@ -183,9 +183,9 @@ public class NotificationService {
                                    String studentPhone, BigDecimal amount, LocalDateTime dueDate) {
         
         String title = "Payment Reminder";
-        String message = String.format("Dear %s, this is a reminder that your payment of $%.2f is due on %s. " +
-                                     "Please make the payment to avoid any late fees.", 
-                                     studentName, amount, dueDate.toLocalDate());
+        String message = ("Dear %s, this is a reminder that your payment of $%.2f is due on %s. " +
+                "Please make the payment to avoid any late fees.").formatted(
+                studentName, amount, dueDate.toLocalDate());
 
         createAndSendNotification(null, null, studentId, "STUDENT", title, message, 
                                 Notification.NotificationType.PAYMENT_REMINDER, 
@@ -200,9 +200,9 @@ public class NotificationService {
                                     String studentPhone, String examName, LocalDateTime examDate) {
         
         String title = "Exam Notification";
-        String message = String.format("Dear %s, you have an exam '%s' scheduled on %s. " +
-                                     "Please arrive 15 minutes early and bring your student ID.", 
-                                     studentName, examName, examDate.toLocalDate());
+        String message = ("Dear %s, you have an exam '%s' scheduled on %s. " +
+                "Please arrive 15 minutes early and bring your student ID.").formatted(
+                studentName, examName, examDate.toLocalDate());
 
         createAndSendNotification(null, null, studentId, "STUDENT", title, message, 
                                 Notification.NotificationType.EXAM_NOTIFICATION, 
@@ -217,8 +217,8 @@ public class NotificationService {
                                            String studentPhone, String courseName, String updateMessage) {
         
         String title = "Course Update";
-        String message = String.format("Dear %s, there is an update for your course '%s': %s", 
-                                     studentName, courseName, updateMessage);
+        String message = "Dear %s, there is an update for your course '%s': %s".formatted(
+                studentName, courseName, updateMessage);
 
         createAndSendNotification(null, null, studentId, "STUDENT", title, message, 
                                 Notification.NotificationType.COURSE_UPDATE, 
@@ -232,9 +232,9 @@ public class NotificationService {
     public void sendSystemMaintenanceNotification(Long institutionId, String maintenanceMessage, 
                                                  LocalDateTime maintenanceStart, LocalDateTime maintenanceEnd) {
         
-        String message = String.format("System maintenance is scheduled from %s to %s. " +
-                                     "During this time, the system may be unavailable. %s", 
-                                     maintenanceStart.toLocalDate(), maintenanceEnd.toLocalDate(), maintenanceMessage);
+        String message = ("System maintenance is scheduled from %s to %s. " +
+                "During this time, the system may be unavailable. %s").formatted(
+                maintenanceStart.toLocalDate(), maintenanceEnd.toLocalDate(), maintenanceMessage);
 
         // Send to all users in the institution
         // TODO: Implement bulk notification sending
