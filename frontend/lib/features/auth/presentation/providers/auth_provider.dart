@@ -38,13 +38,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String username, String password) async {
     _status = AuthStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final request = LoginRequest(email: email, password: password);
+      final request = LoginRequest(username: username, password: password);
       final response = await _authRepository.login(request);
       _user = response.user;
       _status = AuthStatus.authenticated;

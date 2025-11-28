@@ -4,8 +4,10 @@ import com.educationerp.core.dto.ApiResponse;
 import com.educationerp.security.dto.LoginRequest;
 import com.educationerp.security.dto.LoginResponse;
 import com.educationerp.security.dto.RefreshTokenRequest;
+import com.educationerp.security.dto.RegisterRequest;
 import com.educationerp.security.jwt.JwtUtil;
 import com.educationerp.security.service.CustomUserDetailsService;
+import com.educationerp.user_management.entity.User;
 import com.educationerp.user_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,6 +47,53 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    /**
+     * User registration endpoint
+     */
+    @PostMapping("/register")
+    @Operation(summary = "User registration", description = "Register a new user and return JWT tokens")
+    public ResponseEntity<ApiResponse<LoginResponse>> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        logger.info("Registration attempt for email: {}", registerRequest.getEmail());
+
+        try {
+            // Register user
+            User user = userService.registerUser(registerRequest);
+            
+            // Auto-login after registration
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+            CustomUserDetailsService.CustomUserPrincipal customUserPrincipal = 
+                (CustomUserDetailsService.CustomUserPrincipal) userDetails;
+
+            String tenantId = "default"; // Default tenant for now
+
+            // Generate tokens
+            String accessToken = jwtUtil.generateAccessToken(
+                userDetails, tenantId, customUserPrincipal.getUser().getRole());
+            String refreshToken = jwtUtil.generateRefreshToken(
+                userDetails, tenantId, customUserPrincipal.getUser().getRole());
+
+            LoginResponse loginResponse = LoginResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .tokenType("Bearer")
+                    .expiresIn(jwtUtil.extractExpiration(accessToken).getTime())
+                    .username(user.getUsername())
+                    .role(user.getRole())
+                    .tenantId(tenantId)
+                    .build();
+
+            ApiResponse<LoginResponse> response = ApiResponse.success("Registration successful", loginResponse);
+            logger.info("Registration successful for email: {}", registerRequest.getEmail());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Registration failed for email: {}", registerRequest.getEmail(), e);
+            ApiResponse<LoginResponse> response = ApiResponse.error("Registration failed: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 
     /**
      * User login endpoint

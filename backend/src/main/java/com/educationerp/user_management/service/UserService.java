@@ -2,6 +2,7 @@ package com.educationerp.user_management.service;
 
 import com.educationerp.core.exception.BusinessException;
 import com.educationerp.core.exception.ResourceNotFoundException;
+import com.educationerp.security.dto.RegisterRequest;
 import com.educationerp.security.enums.Role;
 import com.educationerp.user_management.dto.CreateUserRequest;
 import com.educationerp.user_management.dto.UpdateUserRequest;
@@ -38,6 +39,46 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    /**
+     * Register a new user from registration form
+     */
+    public User registerUser(RegisterRequest request) {
+        logger.info("Registering new user with email: {}", request.getEmail());
+
+        // Validate unique email
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BusinessException("Email already exists: " + request.getEmail());
+        }
+
+        // Generate username from email (before @ sign)
+        String username = request.getEmail().substring(0, request.getEmail().indexOf("@"));
+        
+        // Make username unique if it already exists
+        String originalUsername = username;
+        int counter = 1;
+        while (userRepository.existsByUsername(username)) {
+            username = originalUsername + counter;
+            counter++;
+        }
+
+        // Create user entity
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setRole(request.getRole());
+        user.setInstitutionId(request.getInstitutionId());
+        user.setBranchId(request.getBranchId());
+        user.setMustChangePassword(false); // User set their own password
+        
+        User savedUser = userRepository.save(user);
+        logger.info("User registered successfully with username: {} (from email: {})", savedUser.getUsername(), request.getEmail());
+
+        return savedUser;
+    }
 
     /**
      * Create a new user

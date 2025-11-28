@@ -1,5 +1,6 @@
 class User {
   final int id;
+  final String username;
   final String email;
   final String firstName;
   final String lastName;
@@ -12,6 +13,7 @@ class User {
 
   User({
     required this.id,
+    required this.username,
     required this.email,
     required this.firstName,
     required this.lastName,
@@ -28,6 +30,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? 0,
+      username: json['username'] ?? '',
       email: json['email'] ?? '',
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
@@ -43,6 +46,7 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'username': username,
       'email': email,
       'firstName': firstName,
       'lastName': lastName,
@@ -58,29 +62,44 @@ class AuthResponse {
   final String accessToken;
   final String refreshToken;
   final User user;
+  final String tokenType;
+  final int expiresIn;
 
   AuthResponse({
     required this.accessToken,
     required this.refreshToken,
     required this.user,
+    this.tokenType = 'Bearer',
+    required this.expiresIn,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] ?? json;
     return AuthResponse(
-      accessToken: json['accessToken'] ?? '',
-      refreshToken: json['refreshToken'] ?? '',
-      user: User.fromJson(json['user'] ?? {}),
+      accessToken: data['token'] ?? data['accessToken'] ?? '',
+      refreshToken: data['refreshToken'] ?? '',
+      tokenType: data['tokenType'] ?? 'Bearer',
+      expiresIn: data['expiresIn'] ?? 0,
+      user: User.fromJson({
+        'id': 0, // Backend'den dönen response'da user detayları yok, username'den alıyoruz
+        'username': data['username'] ?? '',
+        'email': data['username'] ?? '',  // Şimdilik username'i email olarak kullan
+        'firstName': '',
+        'lastName': '',
+        'role': data['role'] ?? '',
+        'isActive': true,
+      }),
     );
   }
 }
 
 class LoginRequest {
-  final String email;
+  final String username;
   final String password;
 
-  LoginRequest({required this.email, required this.password});
+  LoginRequest({required this.username, required this.password});
 
-  Map<String, dynamic> toJson() => {'email': email, 'password': password};
+  Map<String, dynamic> toJson() => {'username': username, 'password': password};
 }
 
 class RegisterRequest {
