@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'core/config/api_config.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialize runtime configuration (web: /config.json, localStorage or build-time)
+  await ApiConfig.init();
   runApp(const EducationErpApp());
 }
 
